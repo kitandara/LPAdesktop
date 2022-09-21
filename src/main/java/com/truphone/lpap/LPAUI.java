@@ -608,30 +608,42 @@ public class LPAUI extends javax.swing.JFrame {
 
     }//GEN-LAST:event_btnConnectActionPerformed
 
+
+/**
+     * Show getfile thingie and do the reading of the qrcode
+     *
+     * @param
+     */
+
+    private void getCodeFromImage() {
+
+        final FileDialog fileDialog = new FileDialog(this,"Select Image",FileDialog.LOAD);
+        fileDialog.setVisible(true);
+        String fname = fileDialog.getFile();
+        String dir = fileDialog.getDirectory();
+        LOG.log(Level.INFO,String.format("Received directory %s, file %s", dir,fname));
+
+        if (fname != null) try {
+            BufferedImage image = ImageIO.read(new FileInputStream(fname));
+            LuminanceSource source = new BufferedImageLuminanceSource(image);
+            BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+            Result r = new MultiFormatReader().decode(bitmap);
+            String fullResult = r.getText();
+            LOG.info(String.format("Got QR string as: %s", fullResult));
+            if (fullResult != null)
+                download(fullResult);
+        } catch (Exception e)
+        {
+            LOG.severe(e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     private void btnAddProfileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddProfileActionPerformed
 //        String code = Util.showInputDialog(this, "Enter Activation Code or Truphone MatchingId", "");
-        Optional<String> code = DialogHelper.showInputActivationCodeDialog(this, "Enter the MatchingId", "");
-        
-        if (code.isPresent()) {
-
-// This block of code is for building the activation code based on the user's input. It allows the download of any profile from any server        
-//        String[] acparts = code.split("\\$");;
-//        String activationCode = "";
-//        if (code.toLowerCase().startsWith("lpa:1$") && acparts.length >= 3) {
-//            //activtion code
-//
-//            activationCode = code.substring(4);
-//        } else if (code.toLowerCase().startsWith("1$") && acparts.length >= 3) {
-//            activationCode = code;
-//        } else {
-//            //matchingId
-//            activationCode = "1$rsp.truphone.com$" + code;
-//        }
-
-        //We consider the inputed value as a matchingID, it will always use truphones SMDP+. 
-        //JOptionPane.showMessageDialog(this, code);
-            download(code.get());
-        }
+       
+        getCodeFromImage();
+ 
     }//GEN-LAST:event_btnAddProfileActionPerformed
 
     private void download(String activationCode) {
