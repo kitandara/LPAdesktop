@@ -57,7 +57,7 @@ public class ApduChannelImpl implements ApduChannel {
         
         LOG.log(Level.INFO, byteArrayToHex(apdu));
         responseApdu = logicalChannel.transmit(new CommandAPDU(apdu));
-        LOG.log(Level.INFO,(String.format("0x%04X", responseApdu.getSW())));
+        LOG.log(Level.INFO,(String.format("0x%04X, resp data: %s", responseApdu.getSW(), byteArrayToHex(responseApdu.getData()))));
         //transmitAPDU("00A4040010A0000005591010FFFFFFFF8900000100");
 
       
