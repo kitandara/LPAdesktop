@@ -6,19 +6,26 @@
 package com.truphone.lpap;
 
 import static com.truphone.lpap.HexHelper.swapNibblesOnString;
+
+import com.google.zxing.BinaryBitmap;
+import com.google.zxing.LuminanceSource;
+import com.google.zxing.MultiFormatReader;
+import com.google.zxing.Result;
+import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
+import com.google.zxing.common.HybridBinarizer;
 import com.truphone.lpap.info.AboutDialog;
 import com.truphone.lpap.card.CardTerminalHandler;
 import com.truphone.lpap.info.InfoProvider;
 import com.truphone.rsp.dto.asn1.rspdefinitions.EuiccConfiguredAddressesResponse;
 import com.truphone.util.LogStub;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Point;
+
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -26,17 +33,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.smartcardio.CardException;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
+
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
 import java.awt.datatransfer.StringSelection;
-import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -262,7 +270,7 @@ public class LPAUI extends javax.swing.JFrame {
         });
 
         btnAddProfile.setForeground(new java.awt.Color(0, 50, 63));
-        btnAddProfile.setText("Download");
+        btnAddProfile.setText("QR Code From File");
         btnAddProfile.setEnabled(false);
         btnAddProfile.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -608,8 +616,7 @@ public class LPAUI extends javax.swing.JFrame {
 
     }//GEN-LAST:event_btnConnectActionPerformed
 
-
-/**
+    /**
      * Show getfile thingie and do the reading of the qrcode
      *
      * @param
@@ -624,14 +631,17 @@ public class LPAUI extends javax.swing.JFrame {
         LOG.log(Level.INFO,String.format("Received directory %s, file %s", dir,fname));
 
         if (fname != null) try {
-            BufferedImage image = ImageIO.read(new FileInputStream(fname));
+            BufferedImage image = ImageIO.read(new FileInputStream(dir + fname));
             LuminanceSource source = new BufferedImageLuminanceSource(image);
             BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
             Result r = new MultiFormatReader().decode(bitmap);
             String fullResult = r.getText();
             LOG.info(String.format("Got QR string as: %s", fullResult));
-            if (fullResult != null)
+            if (fullResult != null) {
+                if (fullResult.toLowerCase().startsWith("lpa:"))
+                    fullResult = fullResult.substring(4);
                 download(fullResult);
+            }
         } catch (Exception e)
         {
             LOG.severe(e.getMessage());
@@ -640,13 +650,36 @@ public class LPAUI extends javax.swing.JFrame {
     }
 
     private void btnAddProfileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddProfileActionPerformed
-//        String code = Util.showInputDialog(this, "Enter Activation Code or Truphone MatchingId", "");
-       
+
         getCodeFromImage();
- 
+
+//        String code = Util.showInputDialog(this, "Enter Activation Code or Truphone MatchingId", "");
+      //  Optional<String> code = DialogHelper.showInputActivationCodeDialog(this, "Enter the MatchingId", "");
+        
+       // if (code.isPresent()) {
+
+// This block of code is for building the activation code based on the user's input. It allows the download of any profile from any server        
+//        String[] acparts = code.split("\\$");;
+//        String activationCode = "";
+//        if (code.toLowerCase().startsWith("lpa:1$") && acparts.length >= 3) {
+//            //activtion code
+//
+//            activationCode = code.substring(4);
+//        } else if (code.toLowerCase().startsWith("1$") && acparts.length >= 3) {
+//            activationCode = code;
+//        } else {
+//            //matchingId
+//            activationCode = "1$rsp.truphone.com$" + code;
+//        }
+
+        //We consider the inputed value as a matchingID, it will always use truphones SMDP+. 
+        //JOptionPane.showMessageDialog(this, code);
+     //       download(code.get());
+      //  }
     }//GEN-LAST:event_btnAddProfileActionPerformed
 
     private void download(String activationCode) {
+        LOG.info("Request to download with activation code: " + activationCode);
         SwingWorker sw = new SwingWorker() {
             @Override
 
