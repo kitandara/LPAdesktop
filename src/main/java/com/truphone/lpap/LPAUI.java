@@ -182,6 +182,7 @@ public class LPAUI extends javax.swing.JFrame {
         btnCloseApp = new javax.swing.JButton();
         btnCloseApp2 = new javax.swing.JButton();
         btnHandleNotifications = new javax.swing.JButton();
+        btnGetDsEvents = new JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         listProfiles = new javax.swing.JList<>();
 
@@ -363,6 +364,15 @@ public class LPAUI extends javax.swing.JFrame {
             }
         });
 
+        btnGetDsEvents.setForeground(new java.awt.Color(0, 50, 63));
+        btnGetDsEvents.setText("Query Root SM-DS");
+        btnGetDsEvents.setEnabled(false);
+        btnGetDsEvents.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnHandleGetEventsActionPerformed(evt);
+            }
+        });
+
         listProfiles.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         listProfiles.setComponentPopupMenu(popUpProfiles);
         jScrollPane1.setViewportView(listProfiles);
@@ -390,7 +400,10 @@ public class LPAUI extends javax.swing.JFrame {
                                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
                                         .addComponent(btnHandleNotifications)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(btnSetSMDPAddress))
+                                        .addComponent(btnSetSMDPAddress)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(btnGetDsEvents)
+                                    )
                                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
                                         .addComponent(jLabel2)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -424,8 +437,10 @@ public class LPAUI extends javax.swing.JFrame {
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnGetDsEvents)
                     .addComponent(btnSetSMDPAddress)
-                    .addComponent(btnHandleNotifications))
+                    .addComponent(btnHandleNotifications)
+                )
                 .addGap(26, 26, 26)
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -758,6 +773,22 @@ public class LPAUI extends javax.swing.JFrame {
 
     }//GEN-LAST:event_btnHandleNotificationsActionPerformed
 
+    private void btnHandleGetEventsActionPerformed(ActionEvent evt) {
+        // Talk to the SM-DS, get list of events...
+        String host = rootSmDsAddress;
+        Optional<String> res = DialogHelper.showInputDialog(null,"Enter SM-DS Host Name: ",host);
+        if (res.isPresent())
+            host = res.get();
+        LOG.log(Level.INFO,  String.format("Preparing to get events from SM-DS %s", host));
+        String[] aclist =   lpa.smdpRetrieveEvents(host);
+        for (String ac : aclist) {
+            if (DialogHelper.showConfirmDialog(null, String.format("Download %s", ac), "Download Profile") == JOptionPane.YES_OPTION) {
+                LOG.log(Level.INFO,  String.format("Preparing to download with Activation Code  %s", ac));
+                download(ac);
+                break;
+            }
+        }
+    }
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
 
     }//GEN-LAST:event_formWindowClosing
@@ -800,6 +831,9 @@ public class LPAUI extends javax.swing.JFrame {
     private javax.swing.JButton btnCloseApp2;
     private javax.swing.JButton btnConnect;
     private javax.swing.JButton btnHandleNotifications;
+
+    private javax.swing.JButton btnGetDsEvents;
+
     private javax.swing.JButton btnRefreshReaders;
     private javax.swing.JButton btnSetSMDPAddress;
     private javax.swing.JComboBox<String> cmbReaders;
@@ -931,6 +965,8 @@ public class LPAUI extends javax.swing.JFrame {
 
         cmbReaders.setEnabled(!processing);
         btnHandleNotifications.setEnabled(!processing);
+
+        btnGetDsEvents.setEnabled(!processing);
 
 //      }
 //        };

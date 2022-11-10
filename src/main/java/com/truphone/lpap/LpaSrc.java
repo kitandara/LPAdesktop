@@ -133,7 +133,7 @@ public class LpaSrc {
         
     }
     
-    public void smdpRetrieveEvents(String smdsAddress){
+    public String[] smdpRetrieveEvents(String smdsAddress){
        String[] acList =   lpa.smdsRetrieveEvents(smdsAddress, dwnProgress);
         //resetLpa();
         //processPendingNotificaitons();
