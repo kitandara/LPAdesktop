@@ -5,24 +5,27 @@
  */
 package com.truphone.lpap;
 
-import static com.truphone.lpap.HexHelper.swapNibblesOnString;
-
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.LuminanceSource;
 import com.google.zxing.MultiFormatReader;
 import com.google.zxing.Result;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
-import com.truphone.lpap.info.AboutDialog;
 import com.truphone.lpap.card.CardTerminalHandler;
+import com.truphone.lpap.info.AboutDialog;
 import com.truphone.lpap.info.InfoProvider;
 import com.truphone.rsp.dto.asn1.rspdefinitions.EuiccConfiguredAddressesResponse;
 import com.truphone.util.LogStub;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 
+import javax.imageio.ImageIO;
+import javax.smartcardio.CardException;
+import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
@@ -31,30 +34,11 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.imageio.ImageIO;
-import javax.smartcardio.CardException;
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.SwingWorker;
 
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
-
-import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Clipboard;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import java.util.Optional;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JTextArea;
+import static com.truphone.lpap.HexHelper.swapNibblesOnString;
 
 /**
  *
@@ -72,7 +56,10 @@ public class LPAUI extends javax.swing.JFrame {
     private Point initialClick;
     
     private List<Map<String, String>> profiles;
-    
+
+    private String rootSmDsAddress;
+    private String smdpAddress;
+
     private final InfoProvider infoProvider = new InfoProvider();
 
     /**
@@ -927,7 +914,8 @@ public class LPAUI extends javax.swing.JFrame {
 
         sb.append("Root SM-DS: ").append(rootDsAddress).append(System.getProperty("line.separator"));
         sb.append("Default SM-DP+: ").append(defaultSmdpAddress).append(System.getProperty("line.separator"));
-
+        this.smdpAddress = defaultSmdpAddress; // Keep them around as well..
+        this.rootSmDsAddress = rootDsAddress;
         txtEuiccInfo.setText(sb.toString());
 
     }
