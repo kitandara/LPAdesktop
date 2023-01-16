@@ -183,6 +183,7 @@ public class LPAUI extends javax.swing.JFrame {
         btnCloseApp2 = new javax.swing.JButton();
         btnHandleNotifications = new javax.swing.JButton();
         btnGetDsEvents = new JButton();
+        btnDownloadPending = new JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         listProfiles = new javax.swing.JList<>();
 
@@ -373,6 +374,16 @@ public class LPAUI extends javax.swing.JFrame {
             }
         });
 
+        btnDownloadPending.setForeground(new java.awt.Color(0, 50, 63));
+        btnDownloadPending.setText("Download Pending Profiles");
+        btnDownloadPending.setEnabled(false);
+
+        btnDownloadPending.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                download(""); // Download default available.
+            }
+        });
+
         listProfiles.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         listProfiles.setComponentPopupMenu(popUpProfiles);
         jScrollPane1.setViewportView(listProfiles);
@@ -403,6 +414,8 @@ public class LPAUI extends javax.swing.JFrame {
                                         .addComponent(btnSetSMDPAddress)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                         .addComponent(btnGetDsEvents)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(btnDownloadPending)
                                     )
                                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
                                         .addComponent(jLabel2)
@@ -437,6 +450,7 @@ public class LPAUI extends javax.swing.JFrame {
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnDownloadPending)
                     .addComponent(btnGetDsEvents)
                     .addComponent(btnSetSMDPAddress)
                     .addComponent(btnHandleNotifications)
@@ -779,6 +793,8 @@ public class LPAUI extends javax.swing.JFrame {
         Optional<String> res = DialogHelper.showInputDialog(null,"Enter SM-DS Host Name: ",host);
         if (res.isPresent())
             host = res.get();
+        else
+            return;
         LOG.log(Level.INFO,  String.format("Preparing to get events from SM-DS %s", host));
         String[] aclist =   lpa.smdpRetrieveEvents(host);
         for (String ac : aclist) {
@@ -833,6 +849,7 @@ public class LPAUI extends javax.swing.JFrame {
     private javax.swing.JButton btnHandleNotifications;
 
     private javax.swing.JButton btnGetDsEvents;
+    private javax.swing.JButton btnDownloadPending;
 
     private javax.swing.JButton btnRefreshReaders;
     private javax.swing.JButton btnSetSMDPAddress;
@@ -967,7 +984,7 @@ public class LPAUI extends javax.swing.JFrame {
         btnHandleNotifications.setEnabled(!processing);
 
         btnGetDsEvents.setEnabled(!processing);
-
+        btnDownloadPending.setEnabled(!processing);
 //      }
 //        };
 //        
